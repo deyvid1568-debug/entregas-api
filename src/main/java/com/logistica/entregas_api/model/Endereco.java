@@ -23,6 +23,10 @@ public class Endereco {
     public String ddd;
     public String siafi;
 
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
     public Endereco() {
     }
 

@@ -2,6 +2,9 @@ package com.logistica.entregas_api.model;
 
 import jakarta.persistence.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table (name = "tb_cliente")
 public class Cliente {
@@ -13,6 +16,11 @@ public class Cliente {
     private String cpf;
     private String email;
     private String telefone;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Endereco> enderecos = new ArrayList<>();
+
+
 
     public Cliente() {
 
