@@ -51,13 +51,15 @@ public class EntregaService {
             Produto produto = produtoRepository.findById(itemDto.getProdutoId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + itemDto.getProdutoId()));
 
-            if (produto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
+            int estoqueAtual = (produto.getQuantidadeEstoque() != null) ? produto.getQuantidadeEstoque() : 0;
+
+            if (estoqueAtual < itemDto.getQuantidade()) {
                 throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome()
-                        + ". Disponível: " + produto.getQuantidadeEstoque()
+                        + ". Disponível: " + estoqueAtual
                         + ", Solicitado: " + itemDto.getQuantidade());
             }
 
-            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDto.getQuantidade());
+            produto.setQuantidadeEstoque(estoqueAtual - itemDto.getQuantidade());
             produtoRepository.save(produto);
 
             ItemEntrega item = new ItemEntrega();

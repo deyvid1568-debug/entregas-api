@@ -179,13 +179,13 @@ public class ViaCepResponseDTO {
 package com.logistica.entregas_api.model;
 
 import jakarta.persistence.*;
-
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table (name = "tb_cliente")
+@Table(name = "tb_cliente")
 public class Cliente {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -195,64 +195,43 @@ public class Cliente {
     private String email;
     private String telefone;
 
-    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "tb_cliente_endereco",
+            joinColumns = @JoinColumn(name = "cliente_id"),
+            inverseJoinColumns = @JoinColumn(name = "endereco_id")
+    )
     private List<Endereco> enderecos = new ArrayList<>();
 
+    public Cliente() {}
 
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Cliente() {
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
 
-    }
+    public String getSobrenome() { return sobrenome; }
+    public void setSobrenome(String sobrenome) { this.sobrenome = sobrenome; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getCpf() { return cpf; }
+    public void setCpf(String cpf) { this.cpf = cpf; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-    public String getNome() {
-        return nome;
-    }
+    public String getTelefone() { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 
-    public void setNome(String nome) {
-        this.nome = nome;
-    }
+    public List<Endereco> getEnderecos() { return enderecos; }
+    public void setEnderecos(List<Endereco> enderecos) { this.enderecos = enderecos; }
 
-    public String getSobrenome() {
-        return sobrenome;
-    }
-
-    public void setSobrenome(String sobrenome) {
-        this.sobrenome = sobrenome;
-    }
-
-    public String getCpf() {
-        return cpf;
-    }
-
-    public void setCpf(String cpf) {
-        this.cpf = cpf;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getTelefone() {
-        return telefone;
-    }
-
-    public void setTelefone(String telefone) {
-        this.telefone = telefone;
+    public void adicionarEndereco(Endereco endereco) {
+        if (!this.enderecos.contains(endereco)) {
+            this.enderecos.add(endereco);
+        }
     }
 }
-
 
 === C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\Endereco.java ===
 
@@ -263,6 +242,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "tb_endereco")
 public class Endereco {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -274,68 +254,28 @@ public class Endereco {
     private String localidade;
     private String uf;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
+    public Endereco() {}
 
-    public Endereco() {
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getLogradouro() { return logradouro; }
+    public void setLogradouro(String logradouro) { this.logradouro = logradouro; }
 
-    public String getUf() {
-        return uf;
-    }
+    public String getComplemento() { return complemento; }
+    public void setComplemento(String complemento) { this.complemento = complemento; }
 
-    public void setUf(String uf) {
-        this.uf = uf;
-    }
+    public String getBairro() { return bairro; }
+    public void setBairro(String bairro) { this.bairro = bairro; }
 
-    public String getCidade() {
-        return localidade;
-    }
+    public String getCidade() { return localidade; }
+    public void setCidade(String localidade) { this.localidade = localidade; }
 
-    public void setCidade(String localidade) {
-        this.localidade = localidade;
-    }
-
-    public String getBairro() {
-        return bairro;
-    }
-
-    public void setBairro(String bairro) {
-        this.bairro = bairro;
-    }
-
-    public String getComplemento() {
-        return complemento;
-    }
-
-    public void setComplemento(String complemento) {
-        this.complemento = complemento;
-    }
-
-    public String getLogradouro() {
-        return logradouro;
-    }
-
-    public void setLogradouro(String logradouro) {
-        this.logradouro = logradouro;
-    }
-
-    public String getCep() {
-        return cep;
-    }
-
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
+    public String getUf() { return uf; }
+    public void setUf(String uf) { this.uf = uf; }
 }
 
 === C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\Entrega.java ===
@@ -580,8 +520,14 @@ public class EntregaService {
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente nÃ£o encontrado com o ID: " + dto.getClienteId()));
 
-        Endereco endereco = viaCepService.buscarEnderecoPorCep(dto.getCep());
-        endereco = enderecoRepository.save(endereco);
+        Endereco endereco = enderecoRepository.findByCep(dto.getCep())
+                .orElseGet(() -> {
+                    Endereco novoEndereco = viaCepService.buscarEnderecoPorCep(dto.getCep());
+                    return enderecoRepository.save(novoEndereco);
+                });
+
+        cliente.adicionarEndereco(endereco);
+        clienteRepository.save(cliente);
 
         Entrega entrega = new Entrega();
         entrega.setCliente(cliente);
@@ -594,10 +540,18 @@ public class EntregaService {
             Produto produto = produtoRepository.findById(itemDto.getProdutoId())
                     .orElseThrow(() -> new RuntimeException("Produto nÃ£o encontrado com o ID: " + itemDto.getProdutoId()));
 
+            if (produto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
+                throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome()
+                        + ". DisponÃ­vel: " + produto.getQuantidadeEstoque()
+                        + ", Solicitado: " + itemDto.getQuantidade());
+            }
+
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDto.getQuantidade());
+            produtoRepository.save(produto);
+
             ItemEntrega item = new ItemEntrega();
             item.setProduto(produto);
             item.setQuantidade(itemDto.getQuantidade());
-
             item.setPrecoUnitario(produto.getPreco());
 
             entrega.adicionarItem(item);
