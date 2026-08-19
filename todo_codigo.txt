@@ -63,15 +63,31 @@ public class EntregaController {
 
 package com.logistica.entregas_api.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+
 import java.util.List;
 
 public class EntregaRequestDTO {
 
+    @NotNull(message = "O ID do cliente Ã© obrigatÃ³rio")
     private Long clienteId;
+
+    @NotBlank(message = "O CEP Ã© obrigatÃ³rio")
+    @Pattern(regexp = "\\d{8}|\\d{5}-\\d{3}", message = "Formato de CEP invÃ¡lido")
     private String cep;
+
+    @NotBlank(message = "O nÃºmero Ã© obrigatÃ³rio")
     private String numero;
+
     private String complemento;
     private String referencia;
+
+    @NotEmpty(message = "A entrega deve conter pelo menos um item")
+    @Valid
     private List<ItemEntregaRequestDTO> itens;
 
     public EntregaRequestDTO() {}
@@ -99,9 +115,16 @@ public class EntregaRequestDTO {
 
 package com.logistica.entregas_api.dto;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+
 public class ItemEntregaRequestDTO {
 
+    @NotNull(message = "O ID do produto Ã© obrigatÃ³rio")
     private Long produtoId;
+
+    @NotNull(message = "A quantidade Ã© obrigatÃ³ria")
+    @Positive(message = "A quantidade deve ser maior que zero")
     private Integer quantidade;
 
     public ItemEntregaRequestDTO() {}
@@ -244,12 +267,12 @@ public class Endereco {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    public String cep;
-    public String logradouro;
-    public String complemento;
-    public String bairro;
-    public String localidade;
-    public String uf;
+    private String cep;
+    private String logradouro;
+    private String complemento;
+    private String bairro;
+    private String localidade;
+    private String uf;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
@@ -504,9 +527,9 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface EntregaRepository extends JpaRepository<Entrega, Integer> {
+public interface EntregaRepository extends JpaRepository<Entrega, Long> {
 
-    List<Entrega> findByClienteId(Integer clienteId);
+    List<Entrega> findByClienteId(Long clienteId);
 
 }
 

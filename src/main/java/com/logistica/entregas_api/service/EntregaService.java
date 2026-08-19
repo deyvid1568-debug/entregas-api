@@ -31,8 +31,14 @@ public class EntregaService {
         Cliente cliente = clienteRepository.findById(dto.getClienteId())
                 .orElseThrow(() -> new RuntimeException("Cliente não encontrado com o ID: " + dto.getClienteId()));
 
-        Endereco endereco = viaCepService.buscarEnderecoPorCep(dto.getCep());
-        endereco = enderecoRepository.save(endereco);
+        Endereco endereco = enderecoRepository.findByCep(dto.getCep())
+                .orElseGet(() -> {
+                    Endereco novoEndereco = viaCepService.buscarEnderecoPorCep(dto.getCep());
+                    return enderecoRepository.save(novoEndereco);
+                });
+
+        cliente.adicionarEndereco(endereco);
+        clienteRepository.save(cliente);
 
         Entrega entrega = new Entrega();
         entrega.setCliente(cliente);
@@ -45,10 +51,18 @@ public class EntregaService {
             Produto produto = produtoRepository.findById(itemDto.getProdutoId())
                     .orElseThrow(() -> new RuntimeException("Produto não encontrado com o ID: " + itemDto.getProdutoId()));
 
+            if (produto.getQuantidadeEstoque() < itemDto.getQuantidade()) {
+                throw new RuntimeException("Estoque insuficiente para o produto: " + produto.getNome()
+                        + ". Disponível: " + produto.getQuantidadeEstoque()
+                        + ", Solicitado: " + itemDto.getQuantidade());
+            }
+
+            produto.setQuantidadeEstoque(produto.getQuantidadeEstoque() - itemDto.getQuantidade());
+            produtoRepository.save(produto);
+
             ItemEntrega item = new ItemEntrega();
             item.setProduto(produto);
             item.setQuantidade(itemDto.getQuantidade());
-
             item.setPrecoUnitario(produto.getPreco());
 
             entrega.adicionarItem(item);

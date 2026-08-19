@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "tb_endereco")
 public class Endereco {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -16,66 +17,26 @@ public class Endereco {
     private String localidade;
     private String uf;
 
-    @ManyToOne
-    @JoinColumn(name = "cliente_id")
-    private Cliente cliente;
+    public Endereco() {}
 
-    public Endereco() {
-    }
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getLogradouro() { return logradouro; }
+    public void setLogradouro(String logradouro) { this.logradouro = logradouro; }
 
-    public String getUf() {
-        return uf;
-    }
+    public String getComplemento() { return complemento; }
+    public void setComplemento(String complemento) { this.complemento = complemento; }
 
-    public void setUf(String uf) {
-        this.uf = uf;
-    }
+    public String getBairro() { return bairro; }
+    public void setBairro(String bairro) { this.bairro = bairro; }
 
-    public String getCidade() {
-        return localidade;
-    }
+    public String getCidade() { return localidade; }
+    public void setCidade(String localidade) { this.localidade = localidade; }
 
-    public void setCidade(String localidade) {
-        this.localidade = localidade;
-    }
-
-    public String getBairro() {
-        return bairro;
-    }
-
-    public void setBairro(String bairro) {
-        this.bairro = bairro;
-    }
-
-    public String getComplemento() {
-        return complemento;
-    }
-
-    public void setComplemento(String complemento) {
-        this.complemento = complemento;
-    }
-
-    public String getLogradouro() {
-        return logradouro;
-    }
-
-    public void setLogradouro(String logradouro) {
-        this.logradouro = logradouro;
-    }
-
-    public String getCep() {
-        return cep;
-    }
-
-    public void setCep(String cep) {
-        this.cep = cep;
-    }
+    public String getUf() { return uf; }
+    public void setUf(String uf) { this.uf = uf; }
 }
