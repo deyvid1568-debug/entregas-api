@@ -13,7 +13,7 @@ public class EntregaRequestDTO {
 
     public EntregaRequestDTO() {}
 
-    public Integer getClienteId() { return clienteId; }
+    public Long getClienteId() { return clienteId; }
     public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
 
     public String getCep() { return cep; }

@@ -39,11 +39,11 @@ public class Endereco {
         this.uf = uf;
     }
 
-    public String getLocalidade() {
+    public String getCidade() {
         return localidade;
     }
 
-    public void setLocalidade(String localidade) {
+    public void setCidade(String localidade) {
         this.localidade = localidade;
     }
 
@@ -78,5 +78,4 @@ public class Endereco {
     public void setCep(String cep) {
         this.cep = cep;
     }
-
 }

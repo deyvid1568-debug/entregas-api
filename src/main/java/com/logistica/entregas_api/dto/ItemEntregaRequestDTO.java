@@ -7,7 +7,7 @@ public class ItemEntregaRequestDTO {
 
     public ItemEntregaRequestDTO() {}
 
-    public Integer getProdutoId() { return produtoId; }
+    public Long getProdutoId() { return produtoId; }
     public void setProdutoId(Integer produtoId) { this.produtoId = produtoId; }
 
     public Integer getQuantidade() { return quantidade; }
