@@ -4,7 +4,7 @@ import java.util.List;
 
 public class EntregaRequestDTO {
 
-    private Integer clienteId;
+    private Long clienteId;
     private String cep;
     private String numero;
     private String complemento;
@@ -14,7 +14,7 @@ public class EntregaRequestDTO {
     public EntregaRequestDTO() {}
 
     public Long getClienteId() { return clienteId; }
-    public void setClienteId(Integer clienteId) { this.clienteId = clienteId; }
+    public void setClienteId(Long clienteId) { this.clienteId = clienteId; }
 
     public String getCep() { return cep; }
     public void setCep(String cep) { this.cep = cep; }
