@@ -7,8 +7,8 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface EntregaRepository extends JpaRepository<Entrega, Integer> {
+public interface EntregaRepository extends JpaRepository<Entrega, Long> {
 
-    List<Entrega> findByClienteId(Integer clienteId);
+    List<Entrega> findByClienteId(Long clienteId);
 
 }

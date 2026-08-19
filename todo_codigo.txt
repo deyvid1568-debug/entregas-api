@@ -1,0 +1,623 @@
+﻿
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\EntregasApiApplication.java ===
+
+package com.logistica.entregas_api;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class EntregasApiApplication {
+
+	public static void main(String[] args) {
+		SpringApplication.run(EntregasApiApplication.class, args);
+	}
+
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\config\AppConfig.java ===
+
+package com.logistica.entregas_api.config;
+
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.web.client.RestTemplate;
+
+@Configuration
+public class AppConfig {
+
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\controller\EntregaController.java ===
+
+package com.logistica.entregas_api.controller;
+
+import com.logistica.entregas_api.dto.EntregaRequestDTO;
+import com.logistica.entregas_api.model.Entrega;
+import com.logistica.entregas_api.service.EntregaService;
+import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+@RestController
+@RequestMapping("/entregas")
+public class EntregaController {
+
+    @Autowired
+    private EntregaService entregaService;
+
+    @PostMapping
+    public ResponseEntity<Entrega> criarEntrega(@Valid @RequestBody EntregaRequestDTO dto) {
+        Entrega novaEntrega = entregaService.criarEntrega(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(novaEntrega);
+    }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\dto\EntregaRequestDTO.java ===
+
+package com.logistica.entregas_api.dto;
+
+import java.util.List;
+
+public class EntregaRequestDTO {
+
+    private Long clienteId;
+    private String cep;
+    private String numero;
+    private String complemento;
+    private String referencia;
+    private List<ItemEntregaRequestDTO> itens;
+
+    public EntregaRequestDTO() {}
+
+    public Long getClienteId() { return clienteId; }
+    public void setClienteId(Long clienteId) { this.clienteId = clienteId; }
+
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
+
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
+
+    public String getComplemento() { return complemento; }
+    public void setComplemento(String complemento) { this.complemento = complemento; }
+
+    public String getReferencia() { return referencia; }
+    public void setReferencia(String referencia) { this.referencia = referencia; }
+
+    public List<ItemEntregaRequestDTO> getItens() { return itens; }
+    public void setItens(List<ItemEntregaRequestDTO> itens) { this.itens = itens; }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\dto\ItemEntregaRequestDTO.java ===
+
+package com.logistica.entregas_api.dto;
+
+public class ItemEntregaRequestDTO {
+
+    private Long produtoId;
+    private Integer quantidade;
+
+    public ItemEntregaRequestDTO() {}
+
+    public Long getProdutoId() { return produtoId; }
+    public void setProdutoId(Long produtoId) { this.produtoId = produtoId; }
+
+    public Integer getQuantidade() { return quantidade; }
+    public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\dto\ViaCepResponseDTO.java ===
+
+package com.logistica.entregas_api.dto;
+
+public class ViaCepResponseDTO {
+
+    private String cep;
+    private String logradouro;
+    private String complemento;
+    private String bairro;
+    private String localidade;
+    private String uf;
+    private Boolean erro;
+
+    public ViaCepResponseDTO() {}
+
+    public String getCep() { return cep; }
+    public void setCep(String cep) { this.cep = cep; }
+
+    public String getLogradouro() { return logradouro; }
+    public void setLogradouro(String logradouro) { this.logradouro = logradouro; }
+
+    public String getComplemento() { return complemento; }
+    public void setComplemento(String complemento) { this.complemento = complemento; }
+
+    public String getBairro() { return bairro; }
+    public void setBairro(String bairro) { this.bairro = bairro; }
+
+    public String getLocalidade() { return localidade; }
+    public void setLocalidade(String localidade) { this.localidade = localidade; }
+
+    public String getUf() { return uf; }
+    public void setUf(String uf) { this.uf = uf; }
+
+    public Boolean getErro() { return erro; }
+    public void setErro(Boolean erro) { this.erro = erro; }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\Cliente.java ===
+
+package com.logistica.entregas_api.model;
+
+import jakarta.persistence.*;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table (name = "tb_cliente")
+public class Cliente {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private String nome;
+    private String sobrenome;
+    private String cpf;
+    private String email;
+    private String telefone;
+
+    @OneToMany(mappedBy = "cliente", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Endereco> enderecos = new ArrayList<>();
+
+
+
+    public Cliente() {
+
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getNome() {
+        return nome;
+    }
+
+    public void setNome(String nome) {
+        this.nome = nome;
+    }
+
+    public String getSobrenome() {
+        return sobrenome;
+    }
+
+    public void setSobrenome(String sobrenome) {
+        this.sobrenome = sobrenome;
+    }
+
+    public String getCpf() {
+        return cpf;
+    }
+
+    public void setCpf(String cpf) {
+        this.cpf = cpf;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getTelefone() {
+        return telefone;
+    }
+
+    public void setTelefone(String telefone) {
+        this.telefone = telefone;
+    }
+}
+
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\Endereco.java ===
+
+package com.logistica.entregas_api.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "tb_endereco")
+public class Endereco {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    public String cep;
+    public String logradouro;
+    public String complemento;
+    public String bairro;
+    public String localidade;
+    public String uf;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    public Endereco() {
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUf() {
+        return uf;
+    }
+
+    public void setUf(String uf) {
+        this.uf = uf;
+    }
+
+    public String getCidade() {
+        return localidade;
+    }
+
+    public void setCidade(String localidade) {
+        this.localidade = localidade;
+    }
+
+    public String getBairro() {
+        return bairro;
+    }
+
+    public void setBairro(String bairro) {
+        this.bairro = bairro;
+    }
+
+    public String getComplemento() {
+        return complemento;
+    }
+
+    public void setComplemento(String complemento) {
+        this.complemento = complemento;
+    }
+
+    public String getLogradouro() {
+        return logradouro;
+    }
+
+    public void setLogradouro(String logradouro) {
+        this.logradouro = logradouro;
+    }
+
+    public String getCep() {
+        return cep;
+    }
+
+    public void setCep(String cep) {
+        this.cep = cep;
+    }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\Entrega.java ===
+
+package com.logistica.entregas_api.model;
+
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
+
+@Entity
+@Table(name = "tb_entrega")
+public class Entrega {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String numero;
+    private String complemento;
+    private String referencia;
+
+    @ManyToOne
+    @JoinColumn(name = "cliente_id")
+    private Cliente cliente;
+
+    @ManyToOne
+    @JoinColumn(name = "endereco_id")
+    private Endereco endereco;
+
+    @OneToMany(mappedBy = "entrega", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ItemEntrega> itens = new ArrayList<>();
+
+    public Entrega() {}
+
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getNumero() { return numero; }
+    public void setNumero(String numero) { this.numero = numero; }
+
+    public String getComplemento() { return complemento; }
+    public void setComplemento(String complemento) { this.complemento = complemento; }
+
+    public String getReferencia() { return referencia; }
+    public void setReferencia(String referencia) { this.referencia = referencia; }
+
+    public Cliente getCliente() { return cliente; }
+    public void setCliente(Cliente cliente) { this.cliente = cliente; }
+
+    public Endereco getEndereco() { return endereco; }
+    public void setEndereco(Endereco endereco) { this.endereco = endereco; }
+
+    public List<ItemEntrega> getItens() { return itens; }
+    public void setItens(List<ItemEntrega> itens) { this.itens = itens; }
+
+
+    public void adicionarItem(ItemEntrega item) {
+        itens.add(item);
+        item.setEntrega(this);
+    }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\ItemEntrega.java ===
+
+package com.logistica.entregas_api.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "tb_item_entrega")
+public class ItemEntrega {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private Integer quantidade;
+    private Double precoUnitario;
+
+    @ManyToOne
+    @JoinColumn(name = "entrega_id")
+    private Entrega entrega;
+
+    @ManyToOne
+    @JoinColumn(name = "produto_id")
+    private Produto produto;
+
+    public ItemEntrega() {}
+
+    // Getters e Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Integer getQuantidade() { return quantidade; }
+    public void setQuantidade(Integer quantidade) { this.quantidade = quantidade; }
+
+    public Double getPrecoUnitario() { return precoUnitario; }
+    public void setPrecoUnitario(Double precoUnitario) { this.precoUnitario = precoUnitario; }
+
+    public Entrega getEntrega() { return entrega; }
+    public void setEntrega(Entrega entrega) { this.entrega = entrega; }
+
+    public Produto getProduto() { return produto; }
+    public void setProduto(Produto produto) { this.produto = produto; }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\model\Produto.java ===
+
+package com.logistica.entregas_api.model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "tb_produto")
+public class Produto {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    private String nome;
+    private Double preco;
+    private Integer quantidadeEstoque;
+    private Double pesoKg;
+
+    public Produto() {}
+
+    public Produto(String nome, Double preco, Integer quantidadeEstoque, Double pesoKg) {
+        this.nome = nome;
+        this.preco = preco;
+        this.quantidadeEstoque = quantidadeEstoque;
+        this.pesoKg = pesoKg;
+    }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public String getNome() { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
+
+    public Double getPreco() { return preco; }
+    public void setPreco(Double preco) { this.preco = preco; }
+
+    public Integer getQuantidadeEstoque() { return quantidadeEstoque; }
+    public void setQuantidadeEstoque(Integer quantidadeEstoque) { this.quantidadeEstoque = quantidadeEstoque; }
+
+    public Double getPesoKg() { return pesoKg; }
+    public void setPesoKg(Double pesoKg) { this.pesoKg = pesoKg; }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\repository\ClienteRepository.java ===
+
+package com.logistica.entregas_api.repository;
+
+import com.logistica.entregas_api.model.Cliente;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ClienteRepository extends JpaRepository<Cliente, Long> {
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\repository\EnderecoRepository.java ===
+
+package com.logistica.entregas_api.repository;
+
+import com.logistica.entregas_api.model.Endereco;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+
+@Repository
+public interface EnderecoRepository extends JpaRepository<Endereco, Long> {
+
+    Optional<Endereco> findByCep(String cep);
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\repository\EntregaRepository.java ===
+
+package com.logistica.entregas_api.repository;
+
+import com.logistica.entregas_api.model.Entrega;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public interface EntregaRepository extends JpaRepository<Entrega, Integer> {
+
+    List<Entrega> findByClienteId(Integer clienteId);
+
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\repository\ProdutoRepository.java ===
+
+package com.logistica.entregas_api.repository;
+
+import com.logistica.entregas_api.model.Produto;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+@Repository
+public interface ProdutoRepository extends JpaRepository<Produto, Long> {
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\service\EntregaService.java ===
+
+package com.logistica.entregas_api.service;
+
+import com.logistica.entregas_api.dto.EntregaRequestDTO;
+import com.logistica.entregas_api.dto.ItemEntregaRequestDTO;
+import com.logistica.entregas_api.model.*;
+import com.logistica.entregas_api.repository.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+@Service
+public class EntregaService {
+
+    @Autowired
+    private EntregaRepository entregaRepository;
+
+    @Autowired
+    private ClienteRepository clienteRepository;
+
+    @Autowired
+    private ProdutoRepository produtoRepository;
+
+    @Autowired
+    private EnderecoRepository enderecoRepository;
+
+    @Autowired
+    private ViaCepService viaCepService;
+
+    @Transactional
+    public Entrega criarEntrega(EntregaRequestDTO dto) {
+        Cliente cliente = clienteRepository.findById(dto.getClienteId())
+                .orElseThrow(() -> new RuntimeException("Cliente nÃ£o encontrado com o ID: " + dto.getClienteId()));
+
+        Endereco endereco = viaCepService.buscarEnderecoPorCep(dto.getCep());
+        endereco = enderecoRepository.save(endereco);
+
+        Entrega entrega = new Entrega();
+        entrega.setCliente(cliente);
+        entrega.setEndereco(endereco);
+        entrega.setNumero(dto.getNumero());
+        entrega.setComplemento(dto.getComplemento());
+        entrega.setReferencia(dto.getReferencia());
+
+        for (ItemEntregaRequestDTO itemDto : dto.getItens()) {
+            Produto produto = produtoRepository.findById(itemDto.getProdutoId())
+                    .orElseThrow(() -> new RuntimeException("Produto nÃ£o encontrado com o ID: " + itemDto.getProdutoId()));
+
+            ItemEntrega item = new ItemEntrega();
+            item.setProduto(produto);
+            item.setQuantidade(itemDto.getQuantidade());
+
+            item.setPrecoUnitario(produto.getPreco());
+
+            entrega.adicionarItem(item);
+        }
+
+        return entregaRepository.save(entrega);
+    }
+}
+
+=== C:\Users\deyvi\OneDrive\Documentos\JavaSpring\entregas-api\src\main\java\com\logistica\entregas_api\service\ViaCepService.java ===
+
+package com.logistica.entregas_api.service;
+
+import com.logistica.entregas_api.dto.ViaCepResponseDTO;
+import com.logistica.entregas_api.model.Endereco;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+@Service
+public class ViaCepService {
+
+    @Autowired
+    private RestTemplate restTemplate;
+
+    public Endereco buscarEnderecoPorCep(String cep) {
+        String cepFormatado = cep.replaceAll("\\D", "");
+
+        String url = "https://viacep.com.br/ws/" + cepFormatado + "/json/";
+
+        ViaCepResponseDTO response = restTemplate.getForObject(url, ViaCepResponseDTO.class);
+
+        if (response == null || Boolean.TRUE.equals(response.getErro())) {
+            throw new RuntimeException("CEP " + cep + " nÃ£o encontrado ou invÃ¡lido!");
+        }
+
+        Endereco endereco = new Endereco();
+        endereco.setCep(response.getCep());
+        endereco.setLogradouro(response.getLogradouro());
+        endereco.setBairro(response.getBairro());
+        endereco.setCidade(response.getLocalidade());
+        endereco.setUf(response.getUf());
+
+        return endereco;
+    }
+}
